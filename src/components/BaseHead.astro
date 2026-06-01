@@ -3,6 +3,7 @@
 // all pages through the use of the <BaseHead /> component.
 import '../styles/global.css';
 import defaultOgImage from '../assets/blog-placeholder-1.jpg';
+import { SITE_TITLE } from '../consts';
 
 interface Props {
 	title: string;
@@ -20,6 +21,14 @@ const { title, description, image = defaultOgImage.src } = Astro.props;
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="generator" content={Astro.generator} />
+
+<!-- RSS feed auto-discovery -->
+<link
+	rel="alternate"
+	type="application/rss+xml"
+	title={SITE_TITLE}
+	href={new URL("rss.xml", Astro.site)}
+/>
 
 <!-- Set theme before first paint to avoid a flash of the wrong theme -->
 <script is:inline>
