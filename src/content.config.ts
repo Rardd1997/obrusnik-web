@@ -15,6 +15,10 @@ const blog = defineCollection({
 			updatedDate: z.coerce.date().optional(),
 			// Validate and import the image, transforming it to metadata
 			heroImage: image().optional(),
+			// Single primary grouping for the post
+			category: z.string(),
+			// Free-form list of finer-grained labels
+			tags: z.array(z.string()).default([]),
 		}),
 });
 

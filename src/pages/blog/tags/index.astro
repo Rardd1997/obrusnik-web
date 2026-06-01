@@ -1,0 +1,62 @@
+---
+import BaseHead from '../../../components/BaseHead.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import { SITE_TITLE } from '../../../consts';
+import { getTags } from '../../../utils/taxonomy';
+
+const tags = await getTags();
+const title = 'Tags';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`${title} — ${SITE_TITLE}`} description="Browse blog posts by tag." />
+		<style>
+			main {
+				width: 720px;
+			}
+			ul.terms {
+				list-style: none;
+				padding: 0;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.75rem;
+			}
+			ul.terms a {
+				display: inline-block;
+				padding: 0.4em 0.9em;
+				border-radius: 999px;
+				background: rgba(var(--gray-light), 0.7);
+				color: rgb(var(--gray-dark));
+				text-decoration: none;
+			}
+			ul.terms a:hover {
+				background: rgb(var(--gray-light));
+				color: var(--accent);
+			}
+			ul.terms .count {
+				opacity: 0.7;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>{title}</h1>
+			<ul class="terms">
+				{
+					tags.map(({ name, slug, count }) => (
+						<li>
+							<a href={`/blog/tags/${slug}/`}>
+								#{name} <span class="count">({count})</span>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</main>
+		<Footer />
+	</body>
+</html>

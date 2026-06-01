@@ -1,10 +1,15 @@
 ---
-import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import FormattedDate from './FormattedDate.astro';
+import Taxonomy from './Taxonomy.astro';
+import { getSortedPosts } from '../utils/taxonomy';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+interface Props {
+	/** Posts to render. Defaults to all blog posts, newest first. */
+	posts?: CollectionEntry<'blog'>[];
+}
+
+const { posts = await getSortedPosts() } = Astro.props;
 ---
 
 <section>
@@ -28,6 +33,7 @@ const posts = (await getCollection('blog')).sort(
 							<FormattedDate date={post.data.pubDate} />
 						</p>
 					</a>
+					<Taxonomy category={post.data.category} tags={post.data.tags} compact />
 				</li>
 			))
 		}

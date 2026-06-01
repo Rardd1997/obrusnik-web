@@ -14,11 +14,27 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 			main {
 				width: 960px;
 			}
+			.browse {
+				display: flex;
+				gap: 1rem;
+				margin-bottom: 1.5rem;
+			}
+			.browse a {
+				color: rgb(var(--gray));
+				text-decoration: none;
+			}
+			.browse a:hover {
+				color: var(--accent);
+			}
 		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
+			<nav class="browse">
+				<a href="/blog/category/">Browse categories</a>
+				<a href="/blog/tags/">Browse tags</a>
+			</nav>
 			<PostList />
 		</main>
 		<Footer />
