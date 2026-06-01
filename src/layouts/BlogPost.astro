@@ -7,9 +7,9 @@ import FormattedDate from '../components/FormattedDate.astro';
 import Comments from '../components/Comments.astro';
 import Taxonomy from '../components/Taxonomy.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<'blog'>['data'] & { readingTime: number };
 
-const { title, description, pubDate, updatedDate, heroImage, category, tags } = Astro.props;
+const { title, description, pubDate, updatedDate, blogImage, category, tags, readingTime } = Astro.props;
 ---
 
 <html lang="en">
@@ -21,10 +21,10 @@ const { title, description, pubDate, updatedDate, heroImage, category, tags } = 
 				max-width: 100%;
 				margin: 0;
 			}
-			.hero-image {
+			.blog-image {
 				width: 100%;
 			}
-			.hero-image img {
+			.blog-image img {
 				display: block;
 				margin: 0 auto;
 				border-radius: 12px;
@@ -53,6 +53,10 @@ const { title, description, pubDate, updatedDate, heroImage, category, tags } = 
 			.last-updated-on {
 				font-style: italic;
 			}
+			.reading-time {
+				margin-top: 0.25em;
+				font-size: 0.9em;
+			}
 		</style>
 	</head>
 
@@ -60,8 +64,8 @@ const { title, description, pubDate, updatedDate, heroImage, category, tags } = 
 		<Header />
 		<main>
 			<article>
-				<div class="hero-image">
-					{heroImage && <img width={960} height={360} src={heroImage.src} alt="" loading="eager" fetchpriority="high" />}
+				<div class="blog-image">
+					{blogImage && <img width={960} height={360} src={blogImage.src} alt="" loading="eager" fetchpriority="high" />}
 				</div>
 				<div class="prose">
 					<div class="title">
@@ -73,7 +77,8 @@ const { title, description, pubDate, updatedDate, heroImage, category, tags } = 
 										Last updated on <FormattedDate date={updatedDate} />
 									</div>
 								)
-							}
+							}  
+							<div class="reading-time">{readingTime} min read</div>
 						</div>
 						<h1>{title}</h1>
 						<Taxonomy category={category} tags={tags} />

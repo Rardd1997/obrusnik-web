@@ -14,7 +14,7 @@ const blog = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			// Validate and import the image, transforming it to metadata
-			heroImage: image().optional(),
+			blogImage: image().optional(),
 			// Single primary grouping for the post
 			category: z.string(),
 			// Free-form list of finer-grained labels
