@@ -1,0 +1,72 @@
+---
+import { slugify } from '../utils/taxonomy';
+
+interface Props {
+	category?: string;
+	tags?: string[];
+	/** Smaller variant for use inside post-list cards. */
+	compact?: boolean;
+}
+
+const { category, tags = [], compact = false } = Astro.props;
+---
+
+<div class:list={['taxonomy', { compact }]}>
+	{
+		category && (
+			<a class="chip category" href={`/blog/category/${slugify(category)}/`}>
+				{category}
+			</a>
+		)
+	}
+	{
+		tags.map((tag) => (
+			<a class="chip tag" href={`/blog/tags/${slugify(tag)}/`}>
+				#{tag}
+			</a>
+		))
+	}
+</div>
+
+<style>
+	.taxonomy {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		justify-content: center;
+		margin: 0.5rem 0;
+	}
+	.chip {
+		display: inline-block;
+		padding: 0.2em 0.7em;
+		border-radius: 999px;
+		font-size: 0.85rem;
+		line-height: 1.4;
+		text-decoration: none;
+		transition: 0.2s ease;
+		white-space: nowrap;
+	}
+	.category {
+		background: var(--accent);
+		color: var(--accent-contrast);
+		font-weight: 600;
+	}
+	.category:hover {
+		background: var(--accent-dark);
+	}
+	.tag {
+		background: rgba(var(--gray-light), 0.7);
+		color: rgb(var(--gray-dark));
+	}
+	.tag:hover {
+		background: rgb(var(--gray-light));
+		color: var(--accent);
+	}
+	.compact {
+		margin: 0.25rem 0 0;
+	}
+	.compact .chip {
+		font-size: 0.75rem;
+		padding: 0.15em 0.6em;
+	}
+</style>

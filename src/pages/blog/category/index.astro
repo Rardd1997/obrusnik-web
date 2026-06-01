@@ -1,0 +1,63 @@
+---
+import BaseHead from '../../../components/BaseHead.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import { SITE_TITLE } from '../../../consts';
+import { getCategories } from '../../../utils/taxonomy';
+
+const categories = await getCategories();
+const title = 'Categories';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`${title} — ${SITE_TITLE}`} description="Browse blog posts by category." />
+		<style>
+			main {
+				width: 720px;
+			}
+			ul.terms {
+				list-style: none;
+				padding: 0;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.75rem;
+			}
+			ul.terms a {
+				display: inline-block;
+				padding: 0.4em 0.9em;
+				border-radius: 999px;
+				background: var(--accent);
+				color: var(--accent-contrast);
+				font-weight: 600;
+				text-decoration: none;
+			}
+			ul.terms a:hover {
+				background: var(--accent-dark);
+			}
+			ul.terms .count {
+				opacity: 0.8;
+				font-weight: 400;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>{title}</h1>
+			<ul class="terms">
+				{
+					categories.map(({ name, slug, count }) => (
+						<li>
+							<a href={`/blog/category/${slug}/`}>
+								{name} <span class="count">({count})</span>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</main>
+		<Footer />
+	</body>
+</html>
