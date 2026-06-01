@@ -31,7 +31,7 @@ const { title, description, pubDate, updatedDate, heroImage, category, tags } = 
 				box-shadow: var(--box-shadow);
 			}
 			.prose {
-				width: 720px;
+				width: 960px;
 				max-width: calc(100% - 2em);
 				margin: auto;
 				padding: 1em;
@@ -61,7 +61,7 @@ const { title, description, pubDate, updatedDate, heroImage, category, tags } = 
 		<main>
 			<article>
 				<div class="hero-image">
-					{heroImage && <img width={720} height={360} src={heroImage.src} alt="" loading="eager" fetchpriority="high" />}
+					{heroImage && <img width={960} height={360} src={heroImage.src} alt="" loading="eager" fetchpriority="high" />}
 				</div>
 				<div class="prose">
 					<div class="title">

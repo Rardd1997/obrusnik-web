@@ -1,0 +1,101 @@
+---
+// Light/dark theme switcher. The initial `data-theme` is set before paint by
+// the inline script in BaseHead.astro; this component only handles toggling
+// and persisting the choice, then broadcasts a `themechange` event so other
+// components (e.g. Comments/giscus) can react.
+---
+
+<button
+	id="theme-toggle"
+	type="button"
+	class="theme-toggle"
+	aria-label="Toggle light and dark theme"
+	title="Toggle light/dark theme"
+>
+	<svg
+		class="icon icon-moon"
+		viewBox="0 0 24 24"
+		width="32"
+		height="32"
+		aria-hidden="true"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+	>
+		<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+	</svg>
+	<svg
+		class="icon icon-sun"
+		viewBox="0 0 24 24"
+		width="32"
+		height="32"
+		aria-hidden="true"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+	>
+		<circle cx="12" cy="12" r="5"></circle>
+		<line x1="12" y1="1" x2="12" y2="3"></line>
+		<line x1="12" y1="21" x2="12" y2="23"></line>
+		<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+		<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+		<line x1="1" y1="12" x2="3" y2="12"></line>
+		<line x1="21" y1="12" x2="23" y2="12"></line>
+		<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+		<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+	</svg>
+</button>
+
+<style>
+	.theme-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.4em;
+		background: none;
+		border: none;
+		border-radius: 8px;
+		color: rgb(var(--gray-dark));
+		cursor: pointer;
+		line-height: 0;
+		transition: 0.2s ease;
+	}
+	.theme-toggle:hover {
+		color: var(--accent);
+		background: rgba(var(--gray-light), 0.6);
+	}
+	/* Show the moon in light mode (click → dark), the sun in dark mode. */
+	.icon-sun {
+		display: none;
+	}
+	:global(html[data-theme="dark"]) .icon-sun {
+		display: block;
+	}
+	:global(html[data-theme="dark"]) .icon-moon {
+		display: none;
+	}
+</style>
+
+<script>
+	function currentTheme(): "light" | "dark" {
+		return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+	}
+
+	function setTheme(theme: "light" | "dark") {
+		document.documentElement.dataset.theme = theme;
+		try {
+			localStorage.setItem("theme", theme);
+		} catch {
+			/* storage may be unavailable (private mode) — toggle still works for the session */
+		}
+		window.dispatchEvent(new CustomEvent("themechange", { detail: theme }));
+	}
+
+	document.getElementById("theme-toggle")?.addEventListener("click", () => {
+		setTheme(currentTheme() === "dark" ? "light" : "dark");
+	});
+</script>
