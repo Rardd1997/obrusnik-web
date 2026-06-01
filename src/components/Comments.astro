@@ -1,0 +1,41 @@
+---
+// Giscus comments — stored in this repo's GitHub Discussions (free, no backend).
+// The data-repo-id / data-category-id below are public client-side identifiers
+// (not secrets). One discussion is created per post via data-mapping="pathname".
+// Reconfigure or regenerate these values at https://giscus.app.
+//
+// `is:inline` keeps Astro from bundling the tag so all data-* attributes render
+// verbatim — required for third-party embed scripts like giscus.
+---
+
+<section class="comments" aria-label="Comments">
+	<h2>Comments</h2>
+	<script
+		is:inline
+		src="https://giscus.app/client.js"
+		data-repo="Rardd1997/obrusnik-web"
+		data-repo-id="R_kgDOSs0bXQ"
+		data-category="Announcements"
+		data-category-id="DIC_kwDOSs0bXc4C-RGc"
+		data-mapping="pathname"
+		data-strict="0"
+		data-reactions-enabled="1"
+		data-emit-metadata="0"
+		data-input-position="bottom"
+		data-theme="preferred_color_scheme"
+		data-lang="en"
+		data-loading="lazy"
+		crossorigin="anonymous"
+		async
+	></script>
+</section>
+
+<style>
+	.comments {
+		margin-top: 3rem;
+	}
+	.comments h2 {
+		margin-bottom: 1rem;
+		color: rgb(var(--black));
+	}
+</style>

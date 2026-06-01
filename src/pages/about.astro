@@ -1,18 +1,20 @@
 ---
-import Layout from '../layouts/BlogPost.astro';
-import heroImage from '../assets/blog-placeholder-about.jpg';
+import Layout from '../layouts/AboutPage.astro';
+import profileImage from '../assets/blog-placeholder-about.jpg';
 ---
 
 <Layout
 	title="About Me"
 	description="Dmytro Obrusnik - Senior Dynamics 365 F&O Developer & Technical Lead"
-	pubDate={new Date('June 01 2026')}
-	heroImage={heroImage}
+	name="Dmytro Obrusnik"
+	role="Senior Dynamics 365 F&O Developer & Technical Lead"
+	intro="Hi, my name is"
+	image={profileImage}
 >
-	<p>Dmytro Obrusnik - I am a seasoned Senior Dynamics 365 Finance & Operations Developer and Technical Lead with over 10 years of experience in end-to-end ERP delivery. </p>
+	<p>I am a seasoned Senior Dynamics 365 Finance & Operations Developer and Technical Lead with over 10 years of experience in end-to-end ERP delivery.</p>
 	<p>
 		My expertise spans the evolution of Microsoft's ERP ecosystem, from Dynamics AX 2009 and 2012 to the modern D365 F&O cloud environment.
-		Throughout my career, I have specialized in solution architecture, complex systems integration, and custom X++ development. 
-		I have a proven track record of delivering high-quality, internationally-scoped solutions for clients across various industries, covering localizations for Ukraine, Poland, Georgia, Azerbaijan, Greece, and the UAE
+		Throughout my career, I have specialized in solution architecture, complex systems integration, and custom X++ development.
+		I have a proven track record of delivering high-quality, internationally-scoped solutions for clients across various industries, covering localizations for Ukraine, Poland, Georgia, Azerbaijan, Greece, and the UAE.
 	</p>
 </Layout>
