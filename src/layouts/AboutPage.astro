@@ -21,13 +21,18 @@ const {
 				margin: 0;
 			}
 			.hero-image {
-				width: 100%;
+				float: left;
+				margin: 0 1.5em 1em 0;
 			}
 			.hero-image img {
 				display: block;
-				margin: 0 auto;
 				border-radius: 12px;
 				box-shadow: var(--box-shadow);
+			}
+			.content::after {
+				content: '';
+				display: block;
+				clear: both;
 			}
 			.prose {
 				width: 960px;
@@ -36,22 +41,13 @@ const {
 				padding: 1em;
 				color: rgb(var(--gray-dark));
 			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
+			.title { 
 				text-align: center;
 				line-height: 1;
 			}
 			.title h1 {
 				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
+			} 
 		</style>
 	</head>
 	<body>
@@ -63,11 +59,11 @@ const {
 						<h1>{title}</h1>
 						<hr />
 					</div>
-					<div>
+					<div class="content">
 						 <div class="hero-image">
-							{aboutImage && <img width={480} height={720} src={aboutImage.src} alt="" loading="eager" fetchpriority="high" />}
+							{aboutImage && <img width={240} height={360} src={aboutImage.src} alt="" loading="eager" fetchpriority="high" />}
 						</div>
-						<slot />  
+						<slot />
 					</div>
 				</div>
 			</article>

@@ -2,8 +2,28 @@
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import PostList from '../components/PostList.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+
+const cards = [
+	{
+		title: 'Blog',
+		description: 'Notes, thoughts and instructions.',
+		href: '/blog',
+		external: false,
+	},
+	{
+		title: 'Projects',
+		description: 'Things I build on my GitHub.',
+		href: 'https://github.com/Rardd1997',
+		external: true,
+	},
+	{
+		title: 'About',
+		description: 'Who I am and what I do.',
+		href: '/about',
+		external: false,
+	},
+];
 ---
 
 <!doctype html>
@@ -11,15 +31,78 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 		<style>
-			main {
-				width: 960px;
+			.intro {
+				text-align: center;
+			}
+			.intro p {
+				color: rgb(var(--gray-dark));
+				max-width: 40em;
+				text-align: left;
+				margin: 0 auto 0.5em auto;
+			}
+			.cards {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 1em;
+				margin-top: 2em;
+			}
+			.card {
+				display: flex;
+				flex-direction: column;
+				padding: 1.5em;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 12px;
+				background: var(--surface);
+				color: rgb(var(--gray-dark));
+				text-decoration: none;
+				transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+			}
+			.card:hover {
+				transform: translateY(-4px);
+				box-shadow: var(--box-shadow);
+				border-color: var(--accent);
+			}
+			.card h2 {
+				margin: 0 0 0.3em 0;
+				color: var(--accent);
+			}
+			.card p {
+				margin: 0;
+				font-size: 0.9em;
+			}
+			@media (max-width: 720px) {
+				.cards {
+					grid-template-columns: 1fr;
+				}
 			}
 		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<PostList />
+			<dev class="intro">
+				<h1>Welcome</h1>
+				<p>
+					Obrusnik Dima's space of the internet - development, technology and
+					whatever else would I like to share with others.
+				</p>
+			</dev>
+			<hr />
+			<nav class="cards">
+				{
+					cards.map((card) => (
+						<a
+							class="card"
+							href={card.href}
+							target={card.external ? '_blank' : undefined}
+							rel={card.external ? 'noopener noreferrer' : undefined}
+						>
+							<h2>{card.title}</h2>
+							<p>{card.description}</p>
+						</a>
+					))
+				}
+			</nav>
 		</main>
 		<Footer />
 	</body>
