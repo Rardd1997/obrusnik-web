@@ -69,7 +69,7 @@ import { SITE_TITLE } from '../consts';
 	}
 	nav a {
 		padding: 1em 0.5em;
-		color: var(--black);
+		color: rgb(var(--black));
 		border-bottom: 4px solid transparent;
 		text-decoration: none;
 	}
@@ -101,6 +101,29 @@ import { SITE_TITLE } from '../consts';
 	@media (max-width: 720px) {
 		.social-links {
 			display: none;
+		}
+	}
+	@media (max-width: 600px) {
+		nav {
+			flex-wrap: wrap;
+		}
+		h2 {
+			order: 1;
+			white-space: nowrap;
+		}
+		.actions {
+			order: 2;
+			margin-left: auto;
+		}
+		.internal-links {
+			order: 3;
+			flex-basis: 100%;
+			display: flex;
+			justify-content: center;
+			gap: 0.5em;
+		}
+		.internal-links a {
+			padding: 0.6em 0.5em;
 		}
 	}
 </style>
