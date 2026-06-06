@@ -6,6 +6,8 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Comments from '../components/Comments.astro';
 import Taxonomy from '../components/Taxonomy.astro';
+import ListenToPost from '../components/ListenToPost.astro';
+import ShareButtons from '../components/ShareButtons.astro';
 
 type Props = CollectionEntry<'blog'>['data'] & { readingTime: number };
 
@@ -17,45 +19,107 @@ const { title, description, pubDate, updatedDate, blogImage, category, tags, rea
 		<BaseHead title={title} description={description} />
 		<style>
 			main {
-				width: calc(100% - 2em);
+				width: 100%;
 				max-width: 100%;
 				margin: 0;
+				padding: 0;
 			}
-			.blog-image {
-				width: 100%;
+
+			/* --- Hero --- */
+			.post-hero {
+				background: linear-gradient(135deg, #eef2fc 0%, #e8edfb 50%, #f2eef9 100%);
+				border-bottom: 1px solid rgba(var(--gray), 0.25);
 			}
-			.blog-image img {
-				display: block;
+			.hero-inner {
+				width: 1200px;
+				max-width: calc(100% - 3em);
 				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
+				padding: 3rem 0;
+				display: grid;
+				grid-template-columns: 1fr 1.1fr;
+				gap: 2.5rem;
+				align-items: center;
 			}
-			.prose {
-				width: 960px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
+			.hero-text {
+				min-width: 0;
+			}
+			.hero-meta {
+				margin: 0 0 1rem;
 				color: rgb(var(--gray-dark));
+				font-size: 0.9rem;
 			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
+			.hero-meta .dot {
+				margin: 0 0.4em;
 			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
+			.hero-text h1 {
+				margin: 0 0 1rem;
+				font-size: 2.7rem;
+				line-height: 1.1;
 			}
 			.last-updated-on {
 				font-style: italic;
 			}
-			.reading-time {
-				margin-top: 0.25em;
-				font-size: 0.9em;
+			.hero-media img {
+				display: block;
+				width: 100%;
+				border-radius: 14px;
+				box-shadow: var(--box-shadow);
+			}
+
+			/* --- Body: share rail + prose --- */
+			.post-body {
+				width: 1100px;
+				max-width: calc(100% - 3em);
+				margin: 0 auto;
+				padding: 3rem 0 1rem;
+			}
+			.body-inner {
+				display: grid;
+				grid-template-columns: 200px minmax(0, 1fr);
+				gap: 2.5rem;
+				align-items: start;
+			}
+			.post-aside {
+				position: sticky;
+				top: 1.5rem;
+			}
+			.prose {
+				min-width: 0;
+				color: rgb(var(--gray-dark));
+			}
+
+			@media (max-width: 900px) {
+				.hero-inner {
+					grid-template-columns: 1fr;
+					gap: 1.75rem;
+					padding: 2.25rem 0;
+				}
+				.hero-media {
+					order: -1;
+				}
+				.hero-text h1 {
+					font-size: 2rem;
+				}
+				.body-inner {
+					grid-template-columns: 1fr;
+					gap: 1.5rem;
+				}
+				.post-aside {
+					position: static;
+				}
+				.post-body {
+					padding-top: 2rem;
+				}
+			}
+		</style>
+		<style is:global>
+			/* Warm hero gradient toned down for dark mode. */
+			html[data-theme='dark'] .post-hero {
+				background: linear-gradient(135deg, #1b1e2b 0%, #1d2030 50%, #231f31 100%);
+			}
+			/* Taxonomy centers its chips by default; keep them left-aligned in the hero. */
+			.hero-text .taxonomy {
+				justify-content: flex-start;
 			}
 		</style>
 	</head>
@@ -64,28 +128,43 @@ const { title, description, pubDate, updatedDate, blogImage, category, tags, rea
 		<Header />
 		<main>
 			<article>
-				<div class="blog-image">
-					{blogImage && <img width={960} height={360} src={blogImage.src} alt="" loading="eager" fetchpriority="high" />}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}  
-							<div class="reading-time">{readingTime} min read</div>
+				<header class="post-hero">
+					<div class="hero-inner">
+						<div class="hero-text">
+							<p class="hero-meta">
+								<FormattedDate date={pubDate} />
+								<span class="dot">•</span>
+								{readingTime} min read
+								{
+									updatedDate && (
+										<span class="last-updated-on">
+											{' '}— updated <FormattedDate date={updatedDate} />
+										</span>
+									)
+								}
+							</p>
+							<h1>{title}</h1>
+							<Taxonomy category={category} tags={tags} />
+							<ListenToPost />
 						</div>
-						<h1>{title}</h1>
-						<Taxonomy category={category} tags={tags} />
-						<hr />
+						<div class="hero-media">
+							{blogImage && <img width={960} height={540} src={blogImage.src} alt="" loading="eager" fetchpriority="high" />}
+						</div>
 					</div>
-					<slot />
-					<Comments />
+				</header>
+
+				<div class="post-body">
+					<div class="body-inner">
+						<aside class="post-aside">
+							<ShareButtons />
+						</aside>
+						<div class="prose">
+							<div id="post-content">
+								<slot />
+							</div>
+							<Comments />
+						</div>
+					</div>
 				</div>
 			</article>
 		</main>

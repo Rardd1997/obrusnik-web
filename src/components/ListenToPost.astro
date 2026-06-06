@@ -1,0 +1,318 @@
+---
+/**
+ * "Listen to this post" player. Reads the rendered article aloud using the
+ * browser's built-in Web Speech API (SpeechSynthesis) — no external service.
+ * It reads the text content of the element matching `contentSelector`.
+ */
+interface Props {
+	/** CSS selector for the element whose text should be read aloud. */
+	contentSelector?: string;
+}
+
+const { contentSelector = '#post-content' } = Astro.props;
+---
+
+<div class="listen" data-listen data-content={contentSelector}>
+	<p class="listen-label">Listen to this post</p>
+	<div class="player">
+		<button class="play" type="button" data-play aria-label="Play">
+			<svg class="ico ico-play" viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+				<path fill="currentColor" d="M4 2.5v11a.5.5 0 0 0 .77.42l8.5-5.5a.5.5 0 0 0 0-.84l-8.5-5.5A.5.5 0 0 0 4 2.5z" />
+			</svg>
+			<svg class="ico ico-pause" viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+				<path fill="currentColor" d="M5 2.5A1.5 1.5 0 0 0 3.5 4v8A1.5 1.5 0 0 0 5 13.5h.5A1.5 1.5 0 0 0 7 12V4a1.5 1.5 0 0 0-1.5-1.5H5zm5.5 0A1.5 1.5 0 0 0 9 4v8a1.5 1.5 0 0 0 1.5 1.5h.5A1.5 1.5 0 0 0 12.5 12V4A1.5 1.5 0 0 0 11 2.5h-.5z" />
+			</svg>
+		</button>
+		<div
+			class="track"
+			data-track
+			role="slider"
+			tabindex="0"
+			aria-label="Seek"
+			aria-valuemin="0"
+			aria-valuemax="100"
+			aria-valuenow="0"
+		>
+			<div class="fill" data-fill></div>
+		</div>
+		<span class="time" data-time>0:00 / 0:00</span>
+		<button class="rate" type="button" data-rate aria-label="Playback speed">1&times;</button>
+	</div>
+	<p class="listen-note" data-note>Read aloud by your browser</p>
+</div>
+
+<style>
+	.listen {
+		margin-top: 1.5rem;
+		max-width: 560px;
+	}
+	.listen-label {
+		margin: 0 0 0.5rem;
+		font-weight: 700;
+		color: var(--accent);
+	}
+	.player {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.4rem 0.5rem 0.4rem 0.4rem;
+		background: var(--surface);
+		border: 1px solid rgba(var(--gray), 0.3);
+		border-radius: 999px;
+	}
+	.play {
+		flex: 0 0 auto;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 34px;
+		height: 34px;
+		padding: 0;
+		border: none;
+		border-radius: 50%;
+		background: var(--accent);
+		color: var(--accent-contrast);
+		cursor: pointer;
+		transition: 0.2s ease;
+	}
+	.play:hover {
+		background: var(--accent-dark);
+	}
+	.ico-pause {
+		display: none;
+	}
+	.listen[data-playing='true'] .ico-play {
+		display: none;
+	}
+	.listen[data-playing='true'] .ico-pause {
+		display: inline;
+	}
+	.track {
+		flex: 1 1 auto;
+		height: 5px;
+		border-radius: 999px;
+		background: rgba(var(--gray), 0.3);
+		overflow: hidden;
+		cursor: pointer;
+	}
+	.track:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 3px;
+	}
+	.fill {
+		width: 0%;
+		height: 100%;
+		background: var(--accent);
+		transition: width 0.15s linear;
+	}
+	.time {
+		flex: 0 0 auto;
+		font-size: 0.8rem;
+		color: rgb(var(--gray));
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	.rate {
+		flex: 0 0 auto;
+		min-width: 2.4em;
+		padding: 0.2em 0.5em;
+		border: none;
+		border-radius: 6px;
+		background: rgba(var(--gray-light), 0.8);
+		color: rgb(var(--gray-dark));
+		font-size: 0.8rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.rate:hover {
+		color: var(--accent);
+	}
+	.listen-note {
+		margin: 0.5rem 0 0;
+		font-size: 0.8rem;
+		color: rgb(var(--gray));
+	}
+	/* Hidden entirely when the browser can't speak. */
+	.listen[data-unsupported='true'] .player,
+	.listen[data-unsupported='true'] .listen-note {
+		display: none;
+	}
+</style>
+
+<script>
+	function initListen() {
+		const root = document.querySelector<HTMLElement>('[data-listen]');
+		if (!root) return;
+
+		if (!('speechSynthesis' in window)) {
+			root.dataset.unsupported = 'true';
+			return;
+		}
+
+		const synth = window.speechSynthesis;
+		const playBtn = root.querySelector<HTMLButtonElement>('[data-play]')!;
+		const rateBtn = root.querySelector<HTMLButtonElement>('[data-rate]')!;
+		const fill = root.querySelector<HTMLElement>('[data-fill]')!;
+		const timeEl = root.querySelector<HTMLElement>('[data-time]')!;
+		const track = root.querySelector<HTMLElement>('[data-track]')!;
+
+		const selector = root.dataset.content || '#post-content';
+		const source = document.querySelector<HTMLElement>(selector);
+		const text = (source?.innerText || '').replace(/\s+/g, ' ').trim();
+		const total = text.length;
+		const words = text ? text.split(' ').length : 0;
+
+		const rates = [1, 1.25, 1.5, 2, 0.75];
+		let rateIdx = 0;
+		let playing = false;
+		let position = 0; // absolute char index of the playback head
+
+		// Chunk into sentence-ish pieces — long single utterances get cut off in
+		// some browsers (a long-standing Chrome bug), so we queue smaller ones.
+		type Chunk = { text: string; start: number };
+		function buildChunks(t: string): Chunk[] {
+			const parts = t.match(/[^.!?]+[.!?]*\s*/g) || (t ? [t] : []);
+			const chunks: Chunk[] = [];
+			let buf = '';
+			let start = 0;
+			let pos = 0;
+			for (const p of parts) {
+				if (buf && (buf + p).length > 220) {
+					chunks.push({ text: buf, start });
+					start = pos;
+					buf = p;
+				} else {
+					buf += p;
+				}
+				pos += p.length;
+			}
+			if (buf) chunks.push({ text: buf, start });
+			return chunks;
+		}
+		const chunks = buildChunks(text);
+
+		// Index of the chunk that contains a given absolute char position.
+		function chunkAt(charPos: number): number {
+			let idx = 0;
+			for (let i = 0; i < chunks.length; i++) {
+				if (chunks[i].start <= charPos) idx = i;
+				else break;
+			}
+			return idx;
+		}
+
+		function fmt(s: number): string {
+			s = Math.max(0, Math.round(s));
+			const m = Math.floor(s / 60);
+			const sec = s % 60;
+			return m + ':' + String(sec).padStart(2, '0');
+		}
+		function totalSecs(): number {
+			return words ? (words / (200 * rates[rateIdx])) * 60 : 0;
+		}
+		function render(charPos: number) {
+			position = Math.max(0, Math.min(total, charPos));
+			const frac = total ? position / total : 0;
+			fill.style.width = frac * 100 + '%';
+			timeEl.textContent = fmt(totalSecs() * frac) + ' / ' + fmt(totalSecs());
+			track.setAttribute('aria-valuenow', String(Math.round(frac * 100)));
+		}
+		render(0);
+
+		function setPlaying(value: boolean) {
+			playing = value;
+			root!.dataset.playing = value ? 'true' : 'false';
+			playBtn.setAttribute('aria-label', value ? 'Pause' : 'Play');
+		}
+		function stop() {
+			setPlaying(false);
+			render(0);
+		}
+		// Speak starting at an absolute char position, resuming mid-chunk if needed.
+		function speakFrom(charPos: number) {
+			const idx = chunkAt(charPos);
+			if (idx >= chunks.length) {
+				stop();
+				return;
+			}
+			const chunk = chunks[idx];
+			const offset = Math.max(0, charPos - chunk.start);
+			const startAbs = chunk.start + offset;
+			const utter = new SpeechSynthesisUtterance(chunk.text.slice(offset));
+			utter.rate = rates[rateIdx];
+			utter.onboundary = (e) => render(startAbs + (e.charIndex || 0));
+			utter.onend = () => {
+				if (!playing) return;
+				const next = chunk.start + chunk.text.length;
+				render(next);
+				speakFrom(next);
+			};
+			synth.speak(utter);
+		}
+
+		function play() {
+			if (!total) return;
+			synth.cancel();
+			if (position >= total) render(0);
+			setPlaying(true);
+			speakFrom(position);
+		}
+		function pause() {
+			setPlaying(false);
+			synth.cancel();
+		}
+		function seek(frac: number) {
+			render(Math.max(0, Math.min(0.999, frac)) * total);
+			if (playing) {
+				synth.cancel();
+				speakFrom(position);
+			}
+		}
+
+		playBtn.addEventListener('click', () => (playing ? pause() : play()));
+
+		rateBtn.addEventListener('click', () => {
+			rateIdx = (rateIdx + 1) % rates.length;
+			rateBtn.textContent = rates[rateIdx] + '×';
+			if (playing) {
+				synth.cancel();
+				speakFrom(position);
+			} else {
+				render(position);
+			}
+		});
+
+		// Seek by clicking the progress bar.
+		track.addEventListener('click', (e) => {
+			const rect = track.getBoundingClientRect();
+			if (rect.width) seek((e.clientX - rect.left) / rect.width);
+		});
+		// Seek with the keyboard when the bar is focused.
+		track.addEventListener('keydown', (e) => {
+			const frac = total ? position / total : 0;
+			if (e.key === 'ArrowRight') {
+				e.preventDefault();
+				seek(frac + 0.05);
+			} else if (e.key === 'ArrowLeft') {
+				e.preventDefault();
+				seek(frac - 0.05);
+			} else if (e.key === 'Home') {
+				e.preventDefault();
+				seek(0);
+			} else if (e.key === 'End') {
+				e.preventDefault();
+				seek(1);
+			} else if (e.key === ' ' || e.key === 'Enter') {
+				e.preventDefault();
+				playing ? pause() : play();
+			}
+		});
+
+		// Speech keeps running after navigation otherwise.
+		window.addEventListener('pagehide', () => synth.cancel());
+		window.addEventListener('beforeunload', () => synth.cancel());
+	}
+
+	initListen();
+	document.addEventListener('astro:page-load', initListen);
+</script>
