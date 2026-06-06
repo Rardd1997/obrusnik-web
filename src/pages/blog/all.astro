@@ -1,0 +1,389 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { SITE_TITLE } from '../../consts';
+import { getSortedPosts, getCategories, getTags, slugify } from '../../utils/taxonomy';
+import { getReadingTime } from '../../utils/readingTime';
+
+const [posts, categories, tags] = await Promise.all([
+	getSortedPosts(),
+	getCategories(),
+	getTags(),
+]);
+
+const title = 'All posts';
+const description = `Browse all ${posts.length} posts.`;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`${title} — ${SITE_TITLE}`} description={description} />
+		<style>
+			main {
+				width: 1200px;
+			}
+			.layout {
+				display: grid;
+				grid-template-columns: 280px 1fr;
+				gap: 2.5rem;
+				align-items: start;
+			}
+
+			/* --- Sidebar --- */
+			.sidebar {
+				position: sticky;
+				top: 1.5rem;
+				background: var(--surface);
+				border-radius: 16px;
+				box-shadow: 0 1px 2px rgba(var(--gray), 0.18);
+				padding: 1.5rem;
+			}
+			.sidebar h2 {
+				font-size: 1.5rem;
+				margin: 0 0 1rem;
+			}
+			.filter-group {
+				border-top: 1px solid rgb(var(--gray-light));
+				padding: 1rem 0;
+			}
+			.filter-group:first-of-type {
+				border-top: none;
+				padding-top: 0;
+			}
+			.filter-group > legend,
+			.filter-group > .group-title {
+				font-weight: 700;
+				font-size: 0.95rem;
+				color: rgb(var(--black));
+				padding: 0;
+				margin-bottom: 0.75rem;
+			}
+			fieldset.filter-group {
+				border-left: none;
+				border-right: none;
+				border-bottom: none;
+				margin: 0;
+			}
+			.opt {
+				display: flex;
+				align-items: center;
+				gap: 0.55rem;
+				font-size: 0.9rem;
+				color: rgb(var(--gray-dark));
+				padding: 0.25rem 0;
+				cursor: pointer;
+			}
+			.opt input {
+				accent-color: var(--accent);
+				width: 1rem;
+				height: 1rem;
+				margin: 0;
+			}
+			.opt .count {
+				margin-left: auto;
+				color: rgb(var(--gray));
+				font-size: 0.82rem;
+			}
+			.clear-all {
+				background: none;
+				border: none;
+				color: var(--accent);
+				font: inherit;
+				font-size: 0.85rem;
+				cursor: pointer;
+				padding: 0;
+				margin-bottom: 1rem;
+			}
+			.clear-all:hover {
+				text-decoration: underline;
+			}
+
+			/* --- Results --- */
+			.results-head {
+				display: flex;
+				align-items: baseline;
+				justify-content: space-between;
+				margin-bottom: 1.25rem;
+			}
+			.results-head h1 {
+				font-size: 2.2rem;
+				margin: 0;
+			}
+			.count-label {
+				color: rgb(var(--gray));
+				font-size: 0.95rem;
+			}
+			.post-list {
+				display: flex;
+				flex-direction: column;
+				gap: 1.25rem;
+				margin: 0;
+				padding: 0;
+				list-style: none;
+			}
+			.post-row {
+				display: grid;
+				grid-template-columns: 1fr 220px;
+				gap: 1.5rem;
+				align-items: center;
+				background: var(--surface);
+				border-radius: 16px;
+				box-shadow: 0 1px 2px rgba(var(--gray), 0.18);
+				overflow: hidden;
+				text-decoration: none;
+				color: inherit;
+				transition: box-shadow 0.2s ease, transform 0.2s ease;
+			}
+			.post-row:hover {
+				box-shadow: var(--box-shadow);
+				transform: translateY(-2px);
+			}
+			.row-text {
+				padding: 1.5rem 0 1.5rem 1.75rem;
+			}
+			.post-row:not(:has(.row-media)) .row-text {
+				padding-right: 1.75rem;
+			}
+			.meta {
+				margin: 0 0 0.5rem;
+				color: rgb(var(--gray));
+				font-size: 0.85rem;
+			}
+			.meta .dot {
+				margin: 0 0.4em;
+			}
+			.cat-chip {
+				display: inline-block;
+				padding: 0.2em 0.7em;
+				border-radius: 8px;
+				background: rgb(var(--gray-light));
+				color: rgb(var(--black));
+				font-size: 0.75rem;
+				font-weight: 600;
+				margin-bottom: 0.6rem;
+			}
+			.row-title {
+				margin: 0 0 0.5rem;
+				font-size: 1.35rem;
+				line-height: 1.25;
+				color: rgb(var(--black));
+			}
+			.excerpt {
+				margin: 0;
+				color: rgb(var(--gray-dark));
+				font-size: 0.95rem;
+				line-height: 1.5;
+			}
+			.row-media {
+				position: relative;
+				align-self: stretch;
+				min-height: 100%;
+				background: rgb(var(--gray-light));
+			}
+			.row-media img {
+				display: block;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				border-radius: 0;
+			}
+			.empty {
+				padding: 3rem 1rem;
+				text-align: center;
+				color: rgb(var(--gray));
+			}
+			[hidden] {
+				display: none !important;
+			}
+
+			@media (max-width: 900px) {
+				.layout {
+					grid-template-columns: 1fr;
+				}
+				.sidebar {
+					position: static;
+				}
+			}
+			@media (max-width: 560px) {
+				.post-row {
+					grid-template-columns: 1fr;
+				}
+				.row-media {
+					order: -1;
+					aspect-ratio: 16 / 9;
+					min-height: 0;
+				}
+				.row-text {
+					padding: 1.5rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="layout">
+				<aside class="sidebar">
+					<h2>Refine results</h2>
+					<button type="button" class="clear-all" data-clear>Clear all</button>
+
+					<fieldset class="filter-group">
+						<legend>Sort by</legend>
+						<label class="opt">
+							<input type="radio" name="sort" value="newest" checked />
+							Newest to oldest
+						</label>
+						<label class="opt">
+							<input type="radio" name="sort" value="oldest" />
+							Oldest to newest
+						</label>
+					</fieldset>
+
+					{
+						categories.length > 0 && (
+							<fieldset class="filter-group">
+								<legend>Category</legend>
+								{categories.map(({ name, slug, count }) => (
+									<label class="opt">
+										<input type="checkbox" name="category" value={slug} />
+										{name}
+										<span class="count">({count})</span>
+									</label>
+								))}
+							</fieldset>
+						)
+					}
+
+					{
+						tags.length > 0 && (
+							<fieldset class="filter-group">
+								<legend>Tags</legend>
+								{tags.map(({ name, slug, count }) => (
+									<label class="opt">
+										<input type="checkbox" name="tag" value={slug} />
+										{name}
+										<span class="count">({count})</span>
+									</label>
+								))}
+							</fieldset>
+						)
+					}
+				</aside>
+
+				<section>
+					<div class="results-head">
+						<h1>{title}</h1>
+						<span class="count-label" data-count></span>
+					</div>
+
+					<ul class="post-list" data-list>
+						{
+							posts.map((post) => (
+								<li
+									class="post-row-item"
+									data-date={post.data.pubDate.valueOf()}
+									data-category={slugify(post.data.category)}
+									data-tags={post.data.tags.map((t) => slugify(t)).join(' ')}
+								>
+									<a class="post-row" href={`/blog/${post.id}/`}>
+										<div class="row-text">
+											{post.data.category && (
+												<span class="cat-chip">{post.data.category}</span>
+											)}
+											<p class="meta">
+												<FormattedDate date={post.data.pubDate} />
+												<span class="dot">•</span>
+												{getReadingTime(post.body ?? '')} min read
+											</p>
+											<h3 class="row-title">{post.data.title}</h3>
+											<p class="excerpt">{post.data.description}</p>
+										</div>
+										{post.data.blogImage && (
+											<div class="row-media">
+												<img src={post.data.blogImage.src} alt="" loading="lazy" />
+											</div>
+										)}
+									</a>
+								</li>
+							))
+						}
+					</ul>
+					<p class="empty" data-empty hidden>No posts match the selected filters.</p>
+				</section>
+			</div>
+		</main>
+		<Footer />
+
+		<script>
+			const root = document.querySelector('main');
+			if (root) {
+				const list = root.querySelector('[data-list]') as HTMLElement;
+				const items = Array.from(
+					list.querySelectorAll<HTMLElement>('.post-row-item'),
+				);
+				const countLabel = root.querySelector('[data-count]') as HTMLElement;
+				const emptyMsg = root.querySelector('[data-empty]') as HTMLElement;
+				const clearBtn = root.querySelector('[data-clear]') as HTMLButtonElement;
+
+				const checked = (name: string) =>
+					Array.from(
+						root.querySelectorAll<HTMLInputElement>(
+							`input[name="${name}"]:checked`,
+						),
+					).map((el) => el.value);
+
+				const apply = () => {
+					const cats = checked('category');
+					const tags = checked('tag');
+					const sort =
+						(
+							root.querySelector(
+								'input[name="sort"]:checked',
+							) as HTMLInputElement | null
+						)?.value ?? 'newest';
+
+					let visible = 0;
+					for (const item of items) {
+						const cat = item.dataset.category ?? '';
+						const itemTags = (item.dataset.tags ?? '').split(' ').filter(Boolean);
+						const matchCat = cats.length === 0 || cats.includes(cat);
+						const matchTag =
+							tags.length === 0 || tags.some((t) => itemTags.includes(t));
+						const show = matchCat && matchTag;
+						item.hidden = !show;
+						if (show) visible++;
+					}
+
+					const ordered = [...items].sort((a, b) => {
+						const da = Number(a.dataset.date);
+						const db = Number(b.dataset.date);
+						return sort === 'oldest' ? da - db : db - da;
+					});
+					for (const item of ordered) list.appendChild(item);
+
+					countLabel.textContent = `${visible} ${visible === 1 ? 'post' : 'posts'}`;
+					emptyMsg.hidden = visible !== 0;
+				};
+
+				root.addEventListener('change', (e) => {
+					if ((e.target as HTMLElement).matches('input')) apply();
+				});
+				clearBtn.addEventListener('click', () => {
+					root
+						.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+						.forEach((el) => (el.checked = false));
+					const newest = root.querySelector<HTMLInputElement>(
+						'input[name="sort"][value="newest"]',
+					);
+					if (newest) newest.checked = true;
+					apply();
+				});
+
+				apply();
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,95 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE } from '../consts';
+
+const title = 'Page not found';
+const description = "The page you're looking for doesn't exist or has moved.";
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`404 — ${SITE_TITLE}`} description={description} />
+		<style>
+			main {
+				width: 720px;
+			}
+			.not-found {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				text-align: center;
+				gap: 0.5rem;
+				background: var(--surface);
+				border-radius: 16px;
+				box-shadow: 0 1px 2px rgba(var(--gray), 0.18);
+				padding: 3.5rem 2rem;
+			}
+			.code {
+				margin: 0;
+				font-size: 6rem;
+				line-height: 1;
+				font-weight: 700;
+				color: var(--accent);
+			}
+			.not-found h1 {
+				margin: 0;
+				font-size: 2rem;
+			}
+			.not-found p {
+				margin: 0.25rem 0 0;
+				color: rgb(var(--gray-dark));
+				font-size: 1.05rem;
+			}
+			.actions {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 0.75rem;
+				margin-top: 2rem;
+			}
+			.btn {
+				display: inline-block;
+				padding: 0.7em 1.6em;
+				border-radius: 999px;
+				font-weight: 700;
+				text-decoration: none;
+				transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+			}
+			.btn.primary {
+				background: var(--accent);
+				color: var(--accent-contrast);
+			}
+			.btn.primary:hover {
+				background: var(--accent-dark);
+				transform: translateY(-2px);
+			}
+			.btn.ghost {
+				border: 1px solid rgb(var(--gray-light));
+				color: rgb(var(--black));
+			}
+			.btn.ghost:hover {
+				border-color: var(--accent);
+				color: var(--accent);
+				transform: translateY(-2px);
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="not-found">
+				<p class="cвode">404</p>
+				<h1>{title}</h1>
+				<p>{description}</p>
+				<div class="actions">
+					<a class="btn primary" href="/blog/">Back to blog</a>
+					<a class="btn ghost" href="/">Go home</a>
+				</div>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>

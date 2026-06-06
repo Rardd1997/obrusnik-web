@@ -4,6 +4,12 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import PostList from '../../components/PostList.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+import { getSortedPosts } from '../../utils/taxonomy';
+
+const PREVIEW_LIMIT = 5;
+const posts = await getSortedPosts();
+const previewPosts = posts.slice(0, PREVIEW_LIMIT);
+const hasMore = posts.length > PREVIEW_LIMIT;
 ---
 
 <!doctype html>
@@ -26,6 +32,25 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 			.browse a:hover {
 				color: var(--accent);
 			}
+			.view-all {
+				display: flex;
+				justify-content: center;
+				margin-top: 2.5rem;
+			}
+			.view-all a {
+				display: inline-block;
+				padding: 0.7em 1.6em;
+				border-radius: 999px;
+				background: var(--accent);
+				color: var(--accent-contrast);
+				font-weight: 700;
+				text-decoration: none;
+				transition: background 0.2s ease, transform 0.2s ease;
+			}
+			.view-all a:hover {
+				background: var(--accent-dark);
+				transform: translateY(-2px);
+			}
 		</style>
 	</head>
 	<body>
@@ -35,7 +60,14 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 				<a href="/blog/category/">Browse categories</a>
 				<a href="/blog/tags/">Browse tags</a>
 			</nav>
-			<PostList />
+			<PostList posts={previewPosts} />
+			{
+				hasMore && (
+					<div class="view-all">
+						<a href="/blog/all/">View all posts</a>
+					</div>
+				)
+			}
 		</main>
 		<Footer />
 	</body>
